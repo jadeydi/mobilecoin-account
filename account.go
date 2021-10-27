@@ -194,3 +194,28 @@ func hexToScalar(h string) *ristretto.Scalar {
 	var s ristretto.Scalar
 	return s.SetBytes(&buf32)
 }
+
+func (addr *PublicAddress) B58Code() (string, error) {
+	view, err := hex.DecodeString(addr.ViewPublicKey)
+	if err != nil {
+		return "", err
+	}
+	spend, err := hex.DecodeString(addr.SpendPublicKey)
+	if err != nil {
+		return "", err
+	}
+	address := &block.PublicAddress{
+		ViewPublicKey:  &block.CompressedRistretto{Data: view},
+		SpendPublicKey: &block.CompressedRistretto{Data: spend},
+	}
+	wrapper := &block.PrintableWrapper_PublicAddress{PublicAddress: address}
+	data, err := proto.Marshal(&block.PrintableWrapper{Wrapper: wrapper})
+	if err != nil {
+		return "", err
+	}
+
+	bytes := make([]byte, 4)
+	binary.LittleEndian.PutUint32(bytes, crc32.ChecksumIEEE(data))
+	bytes = append(bytes, data...)
+	return base58.Encode(bytes), nil
+}
