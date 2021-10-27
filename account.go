@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"hash/crc32"
 
-	"github.com/MixinNetwork/mobilecoin-account/block"
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/bwesterb/go-ristretto"
 	"github.com/dchest/blake2b"
+	"github.com/jadeydi/mobilecoin-account/block"
 	"google.golang.org/protobuf/proto"
 )
 

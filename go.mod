@@ -1,4 +1,4 @@
-module github.com/MixinNetwork/mobilecoin-account
+module github.com/jadeydi/mobilecoin-account
 
 go 1.17
 
