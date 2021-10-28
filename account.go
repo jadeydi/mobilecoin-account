@@ -204,9 +204,16 @@ func (addr *PublicAddress) B58Code() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	sig, err := hex.DecodeString(addr.FogAuthoritySig)
+	if err != nil {
+		return "", err
+	}
 	address := &block.PublicAddress{
-		ViewPublicKey:  &block.CompressedRistretto{Data: view},
-		SpendPublicKey: &block.CompressedRistretto{Data: spend},
+		ViewPublicKey:   &block.CompressedRistretto{Data: view},
+		SpendPublicKey:  &block.CompressedRistretto{Data: spend},
+		FogReportUrl:    addr.FogReportUrl,
+		FogReportId:     addr.FogReportId,
+		FogAuthoritySig: sig,
 	}
 	wrapper := &block.PrintableWrapper_PublicAddress{PublicAddress: address}
 	data, err := proto.Marshal(&block.PrintableWrapper{Wrapper: wrapper})
