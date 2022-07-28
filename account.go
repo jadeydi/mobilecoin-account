@@ -10,7 +10,7 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/bwesterb/go-ristretto"
 	"github.com/dchest/blake2b"
-	"github.com/jadeydi/mobilecoin-account/block"
+	"github.com/jadeydi/mobilecoin-account/types"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -18,46 +18,19 @@ const (
 	SUBADDRESS_DOMAIN_TAG = "mc_subaddress"
 )
 
-type PublicAddress struct {
-	ViewPublicKey   string `json:"view_public_key"`
-	SpendPublicKey  string `json:"spend_public_key"`
-	FogReportUrl    string `json:"fog_report_url"`
-	FogReportId     string `json:"fog_report_id"`
-	FogAuthoritySig string `json:"fog_authority_sig"`
-}
-
 type Account struct {
 	ViewPrivateKey  *ristretto.Scalar
 	SpendPrivateKey *ristretto.Scalar
 }
 
 func NewAccountKey(viewPrivate, spendPrivate string) (*Account, error) {
-	var viewBytes [32]byte
-	viewData, err := hex.DecodeString(viewPrivate)
-	if err != nil {
-		return nil, err
-	}
-	copy(viewBytes[:], viewData)
-
-	var view ristretto.Scalar
 	account := &Account{
-		ViewPrivateKey: view.SetBytes(&viewBytes),
+		ViewPrivateKey: HexToScalar(spendPrivate),
 	}
 	if spendPrivate != "" {
-		var spendBytes [32]byte
-		spendData, err := hex.DecodeString(spendPrivate)
-		if err != nil {
-			return nil, err
-		}
-		copy(spendBytes[:], spendData)
-		var spend ristretto.Scalar
-		account.SpendPrivateKey = spend.SetBytes(&spendBytes)
+		account.SpendPrivateKey = HexToScalar(spendPrivate)
 	}
 	return account, nil
-}
-
-func ViewPrivateKeyFromHex(viewPrivate string) *ristretto.Scalar {
-	return hexToScalar(viewPrivate)
 }
 
 func (account *Account) SubaddressSpendPrivateKey(index uint64) *ristretto.Scalar {
@@ -87,12 +60,12 @@ func (account *Account) B58Code(index uint64) (string, error) {
 	spend := PublicKey(spendPrivate)
 	view := PublicKey(account.SubaddressViewPrivateKey(spendPrivate))
 
-	address := &block.PublicAddress{
-		ViewPublicKey:  &block.CompressedRistretto{Data: view.Bytes()},
-		SpendPublicKey: &block.CompressedRistretto{Data: spend.Bytes()},
+	address := &types.PublicAddress{
+		ViewPublicKey:  &types.CompressedRistretto{Data: view.Bytes()},
+		SpendPublicKey: &types.CompressedRistretto{Data: spend.Bytes()},
 	}
-	wrapper := &block.PrintableWrapper_PublicAddress{PublicAddress: address}
-	data, err := proto.Marshal(&block.PrintableWrapper{Wrapper: wrapper})
+	wrapper := &types.PrintableWrapper_PublicAddress{PublicAddress: address}
+	data, err := proto.Marshal(&types.PrintableWrapper{Wrapper: wrapper})
 	if err != nil {
 		return "", err
 	}
@@ -110,16 +83,16 @@ func B58CodeFromSpend(viewPrivate string, spend *ristretto.Scalar) (string, erro
 	}
 	view := PublicKey(account.SubaddressViewPrivateKey(spend))
 
-	address := &block.PublicAddress{
-		ViewPublicKey: &block.CompressedRistretto{
+	address := &types.PublicAddress{
+		ViewPublicKey: &types.CompressedRistretto{
 			Data: view.Bytes(),
 		},
-		SpendPublicKey: &block.CompressedRistretto{
+		SpendPublicKey: &types.CompressedRistretto{
 			Data: spend.Bytes(),
 		},
 	}
-	wrapper := &block.PrintableWrapper_PublicAddress{PublicAddress: address}
-	data, err := proto.Marshal(&block.PrintableWrapper{Wrapper: wrapper})
+	wrapper := &types.PrintableWrapper_PublicAddress{PublicAddress: address}
+	data, err := proto.Marshal(&types.PrintableWrapper{Wrapper: wrapper})
 	if err != nil {
 		return "", err
 	}
@@ -140,7 +113,7 @@ func DecodeAccount(account string) (*PublicAddress, error) {
 	if bytes.Compare(sum, data[:4]) != 0 {
 		return nil, fmt.Errorf("Invalid account %s", account)
 	}
-	var wrapper block.PrintableWrapper
+	var wrapper types.PrintableWrapper
 	err := proto.Unmarshal(data[4:], &wrapper)
 	if err != nil {
 		return nil, err
@@ -162,21 +135,18 @@ func PublicKey(private *ristretto.Scalar) *ristretto.Point {
 }
 
 func SharedSecret(viewPrivate, publicKey string) *ristretto.Point {
-	public := hexToPoint(publicKey)
-	private := hexToScalar(viewPrivate)
-	return createSharedSecret(public, private)
+	public := HexToPoint(publicKey)
+	private := HexToScalar(viewPrivate)
+	return CreateSharedSecret(public, private)
 }
 
-func createSharedSecret(public *ristretto.Point, private *ristretto.Scalar) *ristretto.Point {
+func CreateSharedSecret(public *ristretto.Point, private *ristretto.Scalar) *ristretto.Point {
 	var r ristretto.Point
 	return r.ScalarMult(public, private)
 }
 
-func hexToPoint(h string) *ristretto.Point {
-	buf, err := hex.DecodeString(h)
-	if err != nil {
-		panic(err)
-	}
+func HexToPoint(h string) *ristretto.Point {
+	buf := HexToBytes(h)
 	var buf32 [32]byte
 	copy(buf32[:], buf)
 	var s ristretto.Point
@@ -184,45 +154,18 @@ func hexToPoint(h string) *ristretto.Point {
 	return &s
 }
 
-func hexToScalar(h string) *ristretto.Scalar {
-	buf, err := hex.DecodeString(h)
-	if err != nil {
-		panic(err)
-	}
+func HexToScalar(h string) *ristretto.Scalar {
+	buf := HexToBytes(h)
 	var buf32 [32]byte
 	copy(buf32[:], buf)
 	var s ristretto.Scalar
 	return s.SetBytes(&buf32)
 }
 
-func (addr *PublicAddress) B58Code() (string, error) {
-	view, err := hex.DecodeString(addr.ViewPublicKey)
+func HexToBytes(h string) []byte {
+	buf, err := hex.DecodeString(h)
 	if err != nil {
-		return "", err
+		panic(err)
 	}
-	spend, err := hex.DecodeString(addr.SpendPublicKey)
-	if err != nil {
-		return "", err
-	}
-	sig, err := hex.DecodeString(addr.FogAuthoritySig)
-	if err != nil {
-		return "", err
-	}
-	address := &block.PublicAddress{
-		ViewPublicKey:   &block.CompressedRistretto{Data: view},
-		SpendPublicKey:  &block.CompressedRistretto{Data: spend},
-		FogReportUrl:    addr.FogReportUrl,
-		FogReportId:     addr.FogReportId,
-		FogAuthoritySig: sig,
-	}
-	wrapper := &block.PrintableWrapper_PublicAddress{PublicAddress: address}
-	data, err := proto.Marshal(&block.PrintableWrapper{Wrapper: wrapper})
-	if err != nil {
-		return "", err
-	}
-
-	bytes := make([]byte, 4)
-	binary.LittleEndian.PutUint32(bytes, crc32.ChecksumIEEE(data))
-	bytes = append(bytes, data...)
-	return base58.Encode(bytes), nil
+	return buf
 }

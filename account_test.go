@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/jadeydi/mobilecoin-account/block"
+	"github.com/jadeydi/mobilecoin-account/types"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/proto"
 )
@@ -34,7 +34,7 @@ func TestAccount(t *testing.T) {
 	assert.Nil(err)
 	log.Printf("2:: %#v", account)
 
-	var pa block.PublicAddress
+	var pa types.PublicAddress
 	buf, _ := hex.DecodeString("0a220a201c548b856c6b0400c2a99b2e918f267cca1bdee0367dc01258bd2ff9d8d2167412220a201e34eb6fc825788b7532943f1bef76554a8e2624e65190ec65572a29cd2e811c")
 	err = proto.Unmarshal(buf, &pa)
 	if err != nil {
