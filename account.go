@@ -1,10 +1,8 @@
 package api
 
 import (
-	"bytes"
 	"encoding/binary"
 	"encoding/hex"
-	"fmt"
 	"hash/crc32"
 
 	"github.com/btcsuite/btcutil/base58"
@@ -101,32 +99,6 @@ func B58CodeFromSpend(viewPrivate string, spend *ristretto.Scalar) (string, erro
 	binary.LittleEndian.PutUint32(bytes, crc32.ChecksumIEEE(data))
 	bytes = append(bytes, data...)
 	return base58.Encode(bytes), nil
-}
-
-func DecodeAccount(account string) (*PublicAddress, error) {
-	data := base58.Decode(account)
-	if len(data) < 4 {
-		return nil, fmt.Errorf("Invalid account %s", account)
-	}
-	sum := make([]byte, 4)
-	binary.LittleEndian.PutUint32(sum, crc32.ChecksumIEEE(data[4:]))
-	if bytes.Compare(sum, data[:4]) != 0 {
-		return nil, fmt.Errorf("Invalid account %s", account)
-	}
-	var wrapper types.PrintableWrapper
-	err := proto.Unmarshal(data[4:], &wrapper)
-	if err != nil {
-		return nil, err
-	}
-	address := wrapper.GetPublicAddress()
-
-	return &PublicAddress{
-		ViewPublicKey:   hex.EncodeToString(address.GetViewPublicKey().GetData()),
-		SpendPublicKey:  hex.EncodeToString(address.GetSpendPublicKey().GetData()),
-		FogReportUrl:    address.GetFogReportUrl(),
-		FogReportId:     address.GetFogReportId(),
-		FogAuthoritySig: hex.EncodeToString(address.GetFogAuthoritySig()),
-	}, nil
 }
 
 func PublicKey(private *ristretto.Scalar) *ristretto.Point {
