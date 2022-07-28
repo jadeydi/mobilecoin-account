@@ -7,7 +7,7 @@ package report;
 
 import "external.proto";
 
-option go_package = ".;block";
+option go_package = "/types";
 /// The public API for getting reports
 service ReportAPI {
     /// Get all available pubkeys, with Intel SGX reports, fog urls, and expiry info
