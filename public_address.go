@@ -77,3 +77,8 @@ func DecodeB58Code(account string) (*PublicAddress, error) {
 		FogAuthoritySig: hex.EncodeToString(address.GetFogAuthoritySig()),
 	}, nil
 }
+
+// TODO decrapted
+func DecodeAccount(account string) (*PublicAddress, error) {
+	return DecodeB58Code(account)
+}
