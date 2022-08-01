@@ -23,7 +23,7 @@ type Account struct {
 
 func NewAccountKey(viewPrivate, spendPrivate string) (*Account, error) {
 	account := &Account{
-		ViewPrivateKey: HexToScalar(spendPrivate),
+		ViewPrivateKey: HexToScalar(viewPrivate),
 	}
 	if spendPrivate != "" {
 		account.SpendPrivateKey = HexToScalar(spendPrivate)
