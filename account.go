@@ -53,6 +53,17 @@ func (account *Account) SubaddressViewPrivateKey(spend *ristretto.Scalar) *ristr
 	return private.Mul(account.ViewPrivateKey, spend)
 }
 
+func (account *Account) PublicAddress(index uint64) (*PublicAddress, error) {
+	spendPrivate := account.SubaddressSpendPrivateKey(index)
+	spend := PublicKey(spendPrivate)
+	view := PublicKey(account.SubaddressViewPrivateKey(spendPrivate))
+
+	return &PublicAddress{
+		ViewPublicKey:  hex.EncodeToString(view.Bytes()),
+		SpendPublicKey: hex.EncodeToString(spend.Bytes()),
+	}, nil
+}
+
 func (account *Account) B58Code(index uint64) (string, error) {
 	spendPrivate := account.SubaddressSpendPrivateKey(index)
 	spend := PublicKey(spendPrivate)
