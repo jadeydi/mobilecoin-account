@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"hash/crc32"
 
-	"github.com/btcsuite/btcutil/base58"
+	"github.com/btcsuite/btcd/btcutil/base58"
 	"github.com/bwesterb/go-ristretto"
 	"github.com/dchest/blake2b"
 	"github.com/jadeydi/mobilecoin-account/types"

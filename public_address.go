@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"hash/crc32"
 
-	"github.com/btcsuite/btcutil/base58"
+	"github.com/btcsuite/btcd/btcutil/base58"
 	"github.com/jadeydi/mobilecoin-account/types"
 	"google.golang.org/protobuf/proto"
 )
