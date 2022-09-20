@@ -1,23 +1,26 @@
 module github.com/jadeydi/mobilecoin-account
 
-go 1.18
+go 1.19
 
 require (
-	github.com/MixinNetwork/mixin v0.13.16-0.20220915090312-861677a59dbd
-	github.com/bwesterb/go-ristretto v1.2.1
+	github.com/MixinNetwork/mixin v0.13.16
+	github.com/bwesterb/go-ristretto v1.2.2
 	github.com/dchest/blake2b v1.0.0
 	github.com/stretchr/testify v1.8.0
-	google.golang.org/grpc v1.48.0
+	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/net v0.0.0-20220728153142-1f511ac62c11 // indirect
-	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
+	golang.org/x/net v0.0.0-20220919232410-f2f64ebce3c1 // indirect
+	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	google.golang.org/genproto v0.0.0-20220725144611-272f38e5d71b // indirect
+	google.golang.org/genproto v0.0.0-20220919141832-68c03719ef51 // indirect
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
